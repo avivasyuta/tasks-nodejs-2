@@ -1,5 +1,3 @@
-const fs = require('fs');
-const path = require('path');
 const Koa = require('koa');
 const uuid = require('uuid/v4');
 const Router = require('koa-router');
@@ -7,7 +5,6 @@ const passport = require('./libs/passport');
 
 const app = new Koa();
 
-app.use(require('koa-static')('public'));
 app.use(require('koa-bodyparser')());
 
 app.use(async (ctx, next) => {
@@ -43,14 +40,5 @@ router.post('/login', async (ctx, next) => {
 });
 
 app.use(router.routes());
-
-// this for HTML5 history in browser
-const index = fs.readFileSync(path.join(__dirname, 'public/index.html'));
-app.use(async (ctx, next) => {
-  if (!ctx.url.startsWith('/api')) {
-    ctx.set('content-type', 'text/html');
-    ctx.body = index;
-  }
-});
 
 module.exports = app;
