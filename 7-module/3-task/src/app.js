@@ -27,7 +27,7 @@ app.use(async (ctx, next) => {
 app.use((ctx, next) => {
   ctx.login = async function login(user) {
     const token = uuid();
-
+    /* TODO: Тут должен быть код создания сессии */
     return token;
   };
 
