@@ -7,6 +7,7 @@ const {login} = require('./controllers/login');
 const {oauth, oauthCallback} = require('./controllers/oauth');
 
 const app = new Koa();
+app.use(require('koa-bodyparser')());
 
 app.use(async (ctx, next) => {
   try {

@@ -1,15 +1,16 @@
-const fs = require('fs');
-const path = require('path');
 const Koa = require('koa');
-const uuid = require('uuid/v4');
 const Router = require('koa-router');
-const handleMongooseValidationError = require('./libs/validationErrors');
 const Session = require('./models/Session');
+const uuid = require('uuid/v4');
+const handleMongooseValidationError = require('./libs/validationErrors');
 const mustBeAuthenticated = require('./libs/mustBeAuthenticated');
+const {productsBySubcategory, productList, productById} = require('./controllers/products');
+const {categoryList} = require('./controllers/categories');
+const {login} = require('./controllers/login');
+const {oauth, oauthCallback} = require('./controllers/oauth');
+const {me} = require('./controllers/me');
 
 const app = new Koa();
-
-app.use(require('koa-static')('public'));
 app.use(require('koa-bodyparser')());
 
 app.use(async (ctx, next) => {
@@ -28,7 +29,7 @@ app.use(async (ctx, next) => {
 });
 
 app.use((ctx, next) => {
-  ctx.login = async function login(user) {
+  ctx.login = async function(user) {
     const token = uuid();
     await Session.create({token, user, lastVisit: new Date()});
 
@@ -58,23 +59,17 @@ router.use(async (ctx, next) => {
   return next();
 });
 
-router.post('/login', require('./controllers/login'));
-router.get('/oauth/:provider', require('./controllers/oauth').oauth);
-router.post('/oauth_callback', handleMongooseValidationError, require('./controllers/oauth').oauthCallback);
-router.post('/register', handleMongooseValidationError, require('./controllers/register'));
-router.post('/confirm', require('./controllers/confirm'));
+router.get('/categories', categoryList);
+router.get('/products', productsBySubcategory, productList);
+router.get('/products/:id', productById);
 
-router.get('/me', mustBeAuthenticated, require('./controllers/me'));
+router.post('/login', login);
+
+router.get('/oauth/:provider', oauth);
+router.post('/oauth_callback', handleMongooseValidationError, oauthCallback);
+
+router.get('/me', mustBeAuthenticated, me);
 
 app.use(router.routes());
-
-// this for HTML5 history in browser
-const index = fs.readFileSync(path.join(__dirname, 'public/index.html'));
-app.use(async (ctx, next) => {
-  if (!ctx.url.startsWith('/api')) {
-    ctx.set('content-type', 'text/html');
-    ctx.body = index;
-  }
-});
 
 module.exports = app;

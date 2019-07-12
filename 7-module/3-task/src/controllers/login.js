@@ -1,6 +1,6 @@
 const passport = require('../libs/passport');
 
-module.exports = async function login(ctx, next) {
+module.exports.login = async function login(ctx, next) {
   await passport.authenticate('local', async (err, user, info) => {
     if (err) throw err;
 

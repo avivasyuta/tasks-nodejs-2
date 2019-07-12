@@ -5,6 +5,7 @@ const {categoryList} = require('./controllers/categories');
 const {login} = require('./controllers/login');
 
 const app = new Koa();
+app.use(require('koa-bodyparser')());
 
 app.use(async (ctx, next) => {
   try {
