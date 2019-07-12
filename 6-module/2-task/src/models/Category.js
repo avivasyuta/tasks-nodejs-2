@@ -5,7 +5,7 @@ const subCategorySchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
-  }
+  },
 });
 
 const categorySchema = new mongoose.Schema({
@@ -13,8 +13,8 @@ const categorySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  
-  subcategories: [subCategorySchema]
+
+  subcategories: [subCategorySchema],
 });
 
 module.exports = connection.model('Category', categorySchema);

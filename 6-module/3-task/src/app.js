@@ -1,6 +1,6 @@
 const Koa = require('koa');
 const Router = require('koa-router');
-const { productsByQuery } = require('./controllers/products');
+const {productsByQuery} = require('./controllers/products');
 
 const app = new Koa();
 

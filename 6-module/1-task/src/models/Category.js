@@ -5,7 +5,7 @@ const subCategorySchema = new mongoose.Schema({
 });
 
 const categorySchema = new mongoose.Schema({
-  subcategories: [subCategorySchema]
+  subcategories: [subCategorySchema],
 });
 
 module.exports = connection.model('Category', categorySchema);

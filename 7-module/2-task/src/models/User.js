@@ -37,7 +37,7 @@ function generatePassword(salt, password) {
     crypto.pbkdf2(
         password, salt,
         config.crypto.iterations,
-        config.crypto.keyLen,
+        config.crypto.length,
         config.crypto.digest,
         (err, key) => {
           if (err) return reject(err);
@@ -48,11 +48,16 @@ function generatePassword(salt, password) {
 }
 
 function generateSalt() {
-  return crypto.randomBytes(config.crypto.saltLength).toString('hex');
+  return new Promise((resolve, reject) => {
+    crypto.randomBytes(config.crypto.length, (err, buffer) => {
+      if (err) return reject(err);
+      resolve(buffer.toString('hex'));
+    });
+  });
 }
 
 userSchema.methods.setPassword = async function setPassword(password) {
-  this.salt = generateSalt();
+  this.salt = await generateSalt();
   this.passwordHash = await generatePassword(this.salt, password);
 };
 

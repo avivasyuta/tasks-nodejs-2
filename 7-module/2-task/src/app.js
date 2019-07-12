@@ -1,13 +1,12 @@
 const Koa = require('koa');
-const uuid = require('uuid/v4');
 const Router = require('koa-router');
-const config = require('./config');
-const passport = require('./libs/passport');
 const handleMongooseValidationError = require('./libs/validationErrors');
+const {productsBySubcategory, productList, productById} = require('./controllers/products');
+const {categoryList} = require('./controllers/categories');
+const {login} = require('./controllers/login');
+const {oauth, oauthCallback} = require('./controllers/oauth');
 
 const app = new Koa();
-
-app.use(require('koa-bodyparser')());
 
 app.use(async (ctx, next) => {
   try {
@@ -26,51 +25,14 @@ app.use(async (ctx, next) => {
 
 const router = new Router({prefix: '/api'});
 
-router.post('/login', async (ctx, next) => {
-  await passport.authenticate('local', async (err, user, info) => {
-    if (err) throw err;
+router.get('/categories', categoryList);
+router.get('/products', productsBySubcategory, productList);
+router.get('/products/:id', productById);
 
-    if (!user) {
-      ctx.status = 400;
-      ctx.body = {error: info};
-      return;
-    }
+router.post('/login', login);
 
-    const token = uuid();
-
-    ctx.body = {token};
-  })(ctx, next);
-});
-
-router.get('/oauth/:provider', async (ctx, next) => {
-  const provider = ctx.params.provider;
-
-  await passport.authenticate(
-      provider,
-      config.providers[provider].options,
-  )(ctx, next);
-
-  ctx.status = 200;
-  ctx.body = {status: 'ok', location: ctx.response.get('location')};
-});
-
-router.post('/oauth_callback', handleMongooseValidationError, async (ctx, next) => {
-  const provider = ctx.request.body.provider;
-
-  await passport.authenticate(provider, async (err, user, info) => {
-    if (err) throw err;
-
-    if (!user) {
-      ctx.status = 400;
-      ctx.body = {error: info};
-      return;
-    }
-
-    const token = uuid();
-
-    ctx.body = {token};
-  })(ctx, next);
-});
+router.get('/oauth/:provider', oauth);
+router.post('/oauth_callback', handleMongooseValidationError, oauthCallback);
 
 app.use(router.routes());
 

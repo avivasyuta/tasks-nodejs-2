@@ -20,4 +20,3 @@ module.exports = async function authenticate(strategy, email, displayName, done)
     done(err);
   }
 };
-

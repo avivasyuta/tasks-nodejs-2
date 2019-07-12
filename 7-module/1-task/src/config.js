@@ -1,11 +1,12 @@
 module.exports = {
   mongodb: {
-    uri: 'mongodb://localhost/7-module-1-task',
+    uri: (process.env.NODE_ENV === 'test')
+      ? 'mongodb://localhost/7-module-1-task-test'
+      : 'mongodb://localhost/7-module-1-task',
   },
   crypto: {
-    iterations: 10,
-    keyLen: 128,
-    saltLength: 10,
+    iterations: (process.env.NODE_ENV === 'test' ? 1 : 12000),
+    length: 128,
     digest: 'sha512',
   },
 };

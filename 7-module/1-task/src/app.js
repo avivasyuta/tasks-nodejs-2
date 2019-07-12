@@ -1,11 +1,10 @@
 const Koa = require('koa');
-const uuid = require('uuid/v4');
 const Router = require('koa-router');
-const passport = require('./libs/passport');
+const {productsBySubcategory, productList, productById} = require('./controllers/products');
+const {categoryList} = require('./controllers/categories');
+const {login} = require('./controllers/login');
 
 const app = new Koa();
-
-app.use(require('koa-bodyparser')());
 
 app.use(async (ctx, next) => {
   try {
@@ -15,6 +14,7 @@ app.use(async (ctx, next) => {
       ctx.status = err.status;
       ctx.body = {error: err.message};
     } else {
+      console.error(err);
       ctx.status = 500;
       ctx.body = {error: 'Internal server error'};
     }
@@ -23,21 +23,11 @@ app.use(async (ctx, next) => {
 
 const router = new Router({prefix: '/api'});
 
-router.post('/login', async (ctx, next) => {
-  await passport.authenticate('local', async (err, user, info) => {
-    if (err) throw err;
+router.get('/categories', categoryList);
+router.get('/products', productsBySubcategory, productList);
+router.get('/products/:id', productById);
 
-    if (!user) {
-      ctx.status = 400;
-      ctx.body = {error: info};
-      return;
-    }
-
-    const token = uuid();
-
-    ctx.body = {token};
-  })(ctx, next);
-});
+router.post('/login', login);
 
 app.use(router.routes());
 
