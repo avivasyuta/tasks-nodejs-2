@@ -9,7 +9,7 @@ const request = require('request-promise').defaults({
 });
 const expect = require('chai').expect;
 
-describe('9-module-1-task', () => {
+describe('7-module-3-task', () => {
   describe('сессии', function() {
     let server;
     before((done) => {
