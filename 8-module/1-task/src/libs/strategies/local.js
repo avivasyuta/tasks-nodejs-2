@@ -16,6 +16,8 @@ module.exports = new LocalStrategy(
           return done(null, false, 'Невереный пароль');
         }
 
+        /* TODO */
+
         return done(null, user);
       } catch (err) {
         done(err);

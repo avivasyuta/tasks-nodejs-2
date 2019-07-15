@@ -1,6 +1,13 @@
 module.exports = {
   mongodb: {
-    uri: 'mongodb://localhost/8-module-1-task',
+    uri: (process.env.NODE_ENV === 'test')
+      ? 'mongodb://localhost/8-module-1-task-test'
+      : 'mongodb://any-shop',
+  },
+  crypto: {
+    iterations: (process.env.NODE_ENV === 'test' ? 1 : 12000),
+    length: 128,
+    digest: 'sha512',
   },
   providers: {
     github: {

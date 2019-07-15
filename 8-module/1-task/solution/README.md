@@ -6,7 +6,7 @@
 используя значения из полей тела запроса, а также добавив специальный токен, который будет 
 использоваться при подтверждении email.
 ```js
-router.post('/register', async (ctx, next) => {
+module.exports.register = async (ctx, next) => {
   const verificationToken = uuid();
   const user = new User({
     email: ctx.request.body.email,
@@ -18,13 +18,13 @@ router.post('/register', async (ctx, next) => {
   await user.save();
   
   ctx.body = {status: 'ok'};
-});
+};
 ```
 
 Также, на данном этапе нашей задаче является отправка письма пользователю с ссылкой, содержащей 
 токен. Для этого можно воспользоваться функцией `sendMail`:
 ```js
-router.post('/register', async (ctx, next) => {
+module.exports.register = async (ctx, next) => {
   const verificationToken = uuid();
   const user = new User({
     email: ctx.request.body.email,
@@ -43,7 +43,7 @@ router.post('/register', async (ctx, next) => {
   });
   
   ctx.body = {status: 'ok'};
-});
+};
 ```
 
 Не стоит забывать, что создание документа - операция, которая легко может завершиться ошибками
@@ -51,26 +51,7 @@ router.post('/register', async (ctx, next) => {
 занимается middleware `handleMongooseValidationError`, который мы реализовывали в одном из 
 предыдущих заданий, здесь же нам достаточно будет лишь его подключить:
 ```js
-router.post('/register', handleMongooseValidationError, async (ctx, next) => {
-  const verificationToken = uuid();
-  const user = new User({
-    email: ctx.request.body.email,
-    displayName: ctx.request.body.displayName,
-    verificationToken,
-  });
-  
-  await user.setPassword(ctx.request.body.password);
-  await user.save();
-  
-  await sendMail({
-    to: user.email,
-    subject: 'Подтвердите почту',
-    locals: {token: verificationToken},
-    template: 'confirmation',
-  });
-  
-  ctx.body = {status: 'ok'};
-});
+router.post('/register', handleMongooseValidationError, register);
 ```
 
 ## Подтверждение email (обработка `POST` запроса на `/confirm`)
@@ -79,7 +60,7 @@ router.post('/register', handleMongooseValidationError, async (ctx, next) => {
 в базе данных (используя значение поля `verificationToken`) и удалить это поле из базы, в ответ
 пользователю надо вернуть вновь сгенерированный токен.
 ```js
-router.post('/confirm', async (ctx) => {
+module.exports.confirm = async (ctx) => {
   const user = await User.findOne({
     verificationToken: ctx.request.body.verificationToken,
   });
@@ -90,14 +71,14 @@ router.post('/confirm', async (ctx) => {
   const token = uuid();
   
   ctx.body = {token};
-});
+};
 ```
 *Обратите внимание, для удаления значения поля из базы его надо установить в `undefined`.*
 
 В данном случае не стоит также забывать о том, что пользователя может и не оказаться (допустим, 
 токен уже был использован для подтверждения раньше) - в этом случае мы должны вернуть ошибку:
 ```js
-router.post('/confirm', async (ctx) => {
+module.exports.confirm = async (ctx) => {
   const user = await User.findOne({
     verificationToken: ctx.request.body.verificationToken,
   });
@@ -112,7 +93,7 @@ router.post('/confirm', async (ctx) => {
   const token = uuid();
   
   ctx.body = {token};
-});
+};
 ```
 
 ## Изменения в локальной стратегии
