@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema({
     required: 'У пользователя должно быть имя',
     unique: 'Такое имя уже существует',
   },
+  verificationToken: {
+    type: String,
+    index: true,
+  },
   passwordHash: {
     type: String,
   },
