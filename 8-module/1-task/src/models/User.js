@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const connection = require('../libs/connection');
+const config = require('../config');
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -21,10 +22,6 @@ const userSchema = new mongoose.Schema({
     required: 'У пользователя должно быть имя',
     unique: 'Такое имя уже существует',
   },
-  verificationToken: {
-    type: String,
-    index: true,
-  },
   passwordHash: {
     type: String,
   },
@@ -39,8 +36,9 @@ function generatePassword(salt, password) {
   return new Promise((resolve, reject) => {
     crypto.pbkdf2(
         password, salt,
-        10, 128,
-        'sha512',
+        config.crypto.iterations,
+        config.crypto.length,
+        config.crypto.digest,
         (err, key) => {
           if (err) return reject(err);
           resolve(key.toString('hex'));
@@ -49,8 +47,17 @@ function generatePassword(salt, password) {
   });
 }
 
+function generateSalt() {
+  return new Promise((resolve, reject) => {
+    crypto.randomBytes(config.crypto.length, (err, buffer) => {
+      if (err) return reject(err);
+      resolve(buffer.toString('hex'));
+    });
+  });
+}
+
 userSchema.methods.setPassword = async function setPassword(password) {
-  this.salt = crypto.randomBytes(10).toString('hex');
+  this.salt = await generateSalt();
   this.passwordHash = await generatePassword(this.salt, password);
 };
 

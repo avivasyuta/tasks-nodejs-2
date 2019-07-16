@@ -48,8 +48,7 @@ module.exports.register = async (ctx, next) => {
 
 Не стоит забывать, что создание документа - операция, которая легко может завершиться ошибками
 валидации, в этом случае мы должны их обработать и вернуть пользователю в подходящем виде. Этим
-занимается middleware `handleMongooseValidationError`, который мы реализовывали в одном из 
-предыдущих заданий, здесь же нам достаточно будет лишь его подключить:
+занимается middleware `handleMongooseValidationError`, который нам достаточно подключить:
 ```js
 router.post('/register', handleMongooseValidationError, register);
 ```
