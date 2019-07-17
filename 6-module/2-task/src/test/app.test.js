@@ -82,7 +82,7 @@ describe('6-module-2-task', () => {
 
     describe('товары', () => {
       describe('получение списка товаров по подкатегории', () => {
-        it('при несуществующей подкатегории должен возвращаться пустой массив', async () => {
+        it('если товаров не найдено - должен возвращаться пустой массив', async () => {
           const response = await client.get('http://localhost:3000/api/products', {
             params: {subcategory: 'invalid-subcategory'},
           });
