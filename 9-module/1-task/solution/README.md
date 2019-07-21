@@ -69,9 +69,10 @@ io.on('connection', function(socket) {
 ```
 
 ## GET /messages
-Поиск сообщений выполняется с помощью операции `.find`, при этом никаких параметров поиска 
-передавать не нужно - нас интересует вся история сообщений.
-Однако некоторые моменты при выполнении запроса к базе данных стоит учесть. А именно:
+Поиск сообщений выполняется с помощью операции `.find`, так как нас интересуют сообщения именно 
+текущего пользователя, мы должны передать в параметры поиска ключ `chat`, равный идентификатору 
+текущего пользователя.
+Кроме этого есть еще некоторые моменты, которые стоит учесть. А именно:
 1. Сортировка. Мы с вами хотим получить сообщения в обратном хронологическом порядке, то есть 
 сначала самые новые. Для этого после вызова `.find()` добавим вызов `.sort({ date: 1 })`.
 2. Количество элементов. Обычно мессенджеры при старте не загружают всю историю чата, это было бы
@@ -81,7 +82,7 @@ io.on('connection', function(socket) {
 
 В итоге запрос к базе данных будет выглядеть следующим образом:
 ```js
-const messages = await Message.find().sort({ date: 1 }).limit(20);
+const messages = await Message.find({chat: ctx.user.id}).sort({ date: 1 }).limit(20);
 ```
 
 Теперь необходимо выполнить мапинг документов в объекты, требующиеся клиенту. Как и раньше вынесем 
@@ -105,7 +106,7 @@ const Message = require('../models/Message');
 const mapMessage = require('../mappers/message');
 
 module.exports.messageList = async function messages(ctx, next) {
-  const messages = await Message.find().sort({date: 1}).limit(20);
+  const messages = await Message.find({chat: ctx.user.id}).sort({date: 1}).limit(20);
 
   ctx.body = {
     messages: messages.map(mapMessage),

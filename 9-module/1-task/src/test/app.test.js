@@ -1,5 +1,6 @@
 const app = require('../app');
 const connection = require('../libs/connection');
+const mongoose = require('mongoose');
 const User = require('../models/User');
 const Session = require('../models/Session');
 const Message = require('../models/Message');
@@ -119,7 +120,19 @@ describe('9-module-1-task', () => {
       const d = new Date();
       await Session.create({token: 'token', user: u, lastVisit: new Date()});
 
-      const message = await Message.create({user: u.displayName,chat: u,text: 'message',date: d});
+      const message = await Message.create({
+        user: u.displayName,
+        chat: u,
+        text: 'message',
+        date: d
+      });
+  
+      await Message.create({
+        user: 'another-user',
+        chat: mongoose.Types.ObjectId(),
+        text: 'another-message',
+        date: d
+      });
     
       const response = await request({
         method: 'get',
