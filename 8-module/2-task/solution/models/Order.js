@@ -7,14 +7,15 @@ const orderSchema = new mongoose.Schema({
     required: true,
     ref: 'User',
   },
-  products: [{
+  product: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'Product',
-  }],
+  },
   phone: {
     type: String,
     required: true,
+    match: /\+?\d{6,14}/,
   },
   address: {
     type: String,

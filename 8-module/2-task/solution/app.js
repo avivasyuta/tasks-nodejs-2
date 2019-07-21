@@ -1,5 +1,3 @@
-const fs = require('fs');
-const path = require('path');
 const Koa = require('koa');
 const uuid = require('uuid/v4');
 const Router = require('koa-router');
@@ -7,13 +5,18 @@ const cors = require('@koa/cors');
 const handleMongooseValidationError = require('./libs/validationErrors');
 const Session = require('./models/Session');
 const mustBeAuthenticated = require('./libs/mustBeAuthenticated');
-const orders = require('./controllers/orders');
-const registration = require('./controllers/registration');
+
+const {productsBySubcategory, productList, productById} = require('./controllers/products');
+const {categoryList} = require('./controllers/categories');
+const {login} = require('./controllers/login');
+const {oauth, oauthCallback} = require('./controllers/oauth');
+const {me} = require('./controllers/me');
+const {register, confirm} = require('./controllers/registration');
+const {getOrdersList, checkout} = require('./controllers/orders');
 
 const app = new Koa();
 
 app.use(cors());
-app.use(require('koa-static')('public'));
 app.use(require('koa-bodyparser')());
 
 app.use(async (ctx, next) => {
@@ -62,38 +65,23 @@ router.use(async (ctx, next) => {
   return next();
 });
 
-// auth
-router.post('/login', require('./controllers/login'));
-router.get('/oauth/:provider', require('./controllers/oauth').oauth);
-router.post('/oauth_callback', handleMongooseValidationError,
-    require('./controllers/oauth').oauthCallback);
-router.post('/register', handleMongooseValidationError, registration.register);
-router.post('/confirm', registration.confirm);
+router.get('/categories', categoryList);
+router.get('/products', productsBySubcategory, productList);
+router.get('/products/:id', productById);
 
-// shop
-router.get('/categories', require('./controllers/categories'));
-router.get('/products', require('./controllers/products').list);
-router.get('/products/:id', require('./controllers/products').show);
-router.get('/recommendations', require('./controllers/recommendations'));
-router.get('/orders', mustBeAuthenticated, handleMongooseValidationError, orders.list);
-router.post('/orders', mustBeAuthenticated, handleMongooseValidationError, orders.checkout);
+router.post('/login', login);
 
-// search
-router.get('/search', require('./controllers/search'));
+router.get('/oauth/:provider', oauth);
+router.post('/oauth_callback', handleMongooseValidationError, oauthCallback);
 
-// protected
-router.get('/me', mustBeAuthenticated, require('./controllers/me'));
-router.get('/messages', mustBeAuthenticated, require('./controllers/messages'));
+router.get('/me', mustBeAuthenticated, me);
+
+router.post('/register', handleMongooseValidationError, register);
+router.post('/confirm', confirm);
+
+router.get('/orders', mustBeAuthenticated, getOrdersList);
+router.post('/orders', mustBeAuthenticated, handleMongooseValidationError, checkout);
 
 app.use(router.routes());
-
-// this for HTML5 history in browser
-const index = fs.readFileSync(path.join(__dirname, 'public/index.html'));
-app.use(async (ctx, next) => {
-  if (!ctx.url.startsWith('/api')) {
-    ctx.set('content-type', 'text/html');
-    ctx.body = index;
-  }
-});
 
 module.exports = app;

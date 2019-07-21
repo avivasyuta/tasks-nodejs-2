@@ -1,60 +1,31 @@
 const Product = require('../models/Product');
-const compose = require('koa-compose');
+const mongoose = require('mongoose');
+const mapProduct = require('../mappers/product');
 
-function mapProducts(products) {
-  return products.map((product) => ({
-    id: product.id,
-    title: product.title,
-    images: product.images,
-    category: product.category,
-    subcategory: product.subcategory,
-    price: product.price,
-    description: product.description,
-  }));
-}
+module.exports.productsBySubcategory = async function productsBySubcategory(ctx, next) {
+  const {subcategory} = ctx.query;
 
-async function productsByCategory(ctx, next) {
-  const {category} = ctx.query;
-  if (!category) return next();
+  if (!subcategory) return next();
 
-  const products = await Product.find({subcategory: category}).limit(20);
-  ctx.body = {products: mapProducts(products)};
-}
+  const products = await Product.find({subcategory: subcategory}).limit(20);
+  ctx.body = {products: products.map(mapProduct)};
+};
 
-async function productsByQuery(ctx, next) {
-  const {query} = ctx.query;
-  if (!query) return next();
-
-  const products = await Product
-      .find({$text: {$search: query}}, {score: {$meta: 'textScore'}})
-      .sort({score: {$meta: 'textScore'}})
-      .limit(20);
-  ctx.body = {products: mapProducts(products)};
-}
-
-async function productList(ctx, next) {
+module.exports.productList = async function productList(ctx, next) {
   const products = await Product.find().limit(20);
-  ctx.body = {products: mapProducts(products)};
-}
+  ctx.body = {products: products.map(mapProduct)};
+};
 
-async function product(ctx, next) {
+module.exports.productById = async function productById(ctx, next) {
+  if (!mongoose.Types.ObjectId.isValid(ctx.params.id)) {
+    ctx.throw(400, 'invalid product id');
+  }
+
   const product = await Product.findById(ctx.params.id);
 
-  ctx.body = {product: {
-    id: product.id,
-    title: product.title,
-    images: product.images,
-    category: product.category,
-    subcategory: product.subcategory,
-    price: product.price,
-    description: product.description,
-  }};
-}
+  if (!product) {
+    ctx.throw(404, `no product with ${ctx.params.id} id`);
+  }
 
-exports.show = product;
-
-exports.list = compose([
-  productsByCategory,
-  productsByQuery,
-  productList,
-]);
+  ctx.body = {product: mapProduct(product)};
+};

@@ -62,31 +62,30 @@ describe('8-module-2-task', () => {
       expect(userField.ref, 'свойство user ссылается на модель `User`').to.be.equal('User');
     });
 
-    it('должна содержать обязательное свойство `products`', () => {
-      const productsField = Order.schema.obj.products;
+    it('должна содержать обязательное свойство `product`', () => {
+      const productField = Order.schema.obj.product;
 
-      expect(productsField, 'у модели есть свойство products').to.be.not.undefined;
-      expect(productsField, 'свойство products является массивом').to.be.a('array');
-      expect(productsField[0].required, 'свойство products является обязательным').to.be.true;
-      expect(productsField[0].type, 'тип свойства products - ObjectId').to.be.equal(ObjectId);
-      expect(productsField[0].ref, 'свойство products ссылается на модель `Product`')
+      expect(productField, 'у модели есть свойство product').to.be.not.undefined;
+      expect(productField.required, 'свойство product является обязательным').to.be.true;
+      expect(productField.type, 'тип свойства product - ObjectId').to.be.equal(ObjectId);
+      expect(productField.ref, 'свойство product ссылается на модель `Product`')
           .to.be.equal('Product');
     });
 
     it('должна содержать обязательное свойство `address`', () => {
-      const productsField = Order.schema.obj.address;
+      const addressField = Order.schema.obj.address;
 
-      expect(productsField, 'у модели есть свойство address').to.be.not.undefined;
-      expect(productsField.required, 'свойство address является обязательным').to.be.true;
-      expect(productsField.type, 'тип свойства address - строка').to.be.equal(String);
+      expect(addressField, 'у модели есть свойство address').to.be.not.undefined;
+      expect(addressField.required, 'свойство address является обязательным').to.be.true;
+      expect(addressField.type, 'тип свойства address - строка').to.be.equal(String);
     });
 
     it('должна содержать обязательное свойство `phone`', () => {
-      const productsField = Order.schema.obj.phone;
+      const phoneField = Order.schema.obj.phone;
 
-      expect(productsField, 'у модели есть свойство phone').to.be.not.undefined;
-      expect(productsField.required, 'свойство phone является обязательным').to.be.true;
-      expect(productsField.type, 'тип свойства phone - строка').to.be.equal(String);
+      expect(phoneField, 'у модели есть свойство phone').to.be.not.undefined;
+      expect(phoneField.required, 'свойство phone является обязательным').to.be.true;
+      expect(phoneField.type, 'тип свойства phone - строка').to.be.equal(String);
     });
   });
 
@@ -114,7 +113,7 @@ describe('8-module-2-task', () => {
       await createUserAndSession(userData, token);
 
       const body = {
-        products: [createObjectId()],
+        product: createObjectId(),
         phone: '1234567800',
         address: 'home',
       };
@@ -128,17 +127,14 @@ describe('8-module-2-task', () => {
         },
       });
 
-
       expect(response.body, 'тело ответа должно содержать id заказа').to.have.property('order');
       expect(response.body.order, 'id заказа должен быть валдиным ObjectId').to.satisfy(isObjectId);
 
       const order = await Order.findById(response.body.order);
 
       expect(order, 'созданный зказа должен быть в базе данных').to.be.not.undefined;
-      expect(order.products, 'созданный заказ должен содержать список продуктов')
-          .to.include(body.products[0]);
-      expect(order.products, 'созданный заказ должен содержать только переданные продукты')
-          .to.have.lengthOf(body.products.length);
+      expect(order.product.toString(), 'созданный заказ должен содержать переданный продукт')
+          .to.equal(body.product.toString());
       expect(order.phone, 'созданный заказ должен содержать переданный номер телефона')
           .to.be.equal(body.phone);
       expect(order.address, 'созданный заказ должен содержать переданный адресс')
@@ -155,10 +151,10 @@ describe('8-module-2-task', () => {
       const user = await createUserAndSession(userData, token);
 
       const body = {
-        products: [createObjectId()],
+        product: createObjectId(),
         phone: '1234567800',
         address: 'home',
-        user: [createObjectId()],
+        user: createObjectId(),
       };
 
       const response = await request({
@@ -191,6 +187,7 @@ describe('8-module-2-task', () => {
         url: serverURL,
         body: {
           products: 'foo-bar',
+          phone: '12345',
         },
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -199,10 +196,11 @@ describe('8-module-2-task', () => {
 
       expect(statusCode, 'статус код ответа должен быть 400').to.be.equal(400);
       expect(body, 'тело ответа должно содержать объект с ошибками').to.have.property('errors');
-      expect(body.errors, 'products - ожидается получить массив').to.have.property('products')
-          .that.include('Cast to Array failed');
-      expect(body.errors, 'phone - свойство обязательно').to.have.property('phone')
+      expect(body.errors, 'products - ожидается получить ObjectId').to.have.property('product')
           .that.include('required');
+      expect(body.errors, 'phone - свойство должно соответствовать шаблону')
+          .to.have.property('phone')
+          .that.include('invalid');
       expect(body.errors, 'address - свойство обязательно').to.have.property('address')
           .that.include('required');
     });
@@ -295,23 +293,23 @@ describe('8-module-2-task', () => {
 
       const orders = [
         {
-          products: [products[0]._id],
+          product: products[0]._id,
           phone: '1234567800',
           address: 'home',
-          user: [user.id],
+          user: user.id,
         },
         {
-          products: [products[1]._id],
+          product: products[1]._id,
           phone: '1234567800',
           address: 'home',
-          user: [user.id],
+          user: user.id,
         },
         // this order shouldn't be returned
         {
-          products: [products[2]._id],
+          product: products[2]._id,
           phone: '1234567800',
           address: 'home',
-          user: [createObjectId()],
+          user: createObjectId(),
         },
       ];
 

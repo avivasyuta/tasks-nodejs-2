@@ -5,7 +5,9 @@ const orderSchema = new mongoose.Schema({
   user: {
     /* TODO */
   },
-  products: {},
+  product: {
+    /* TODO */
+  },
   phone: {
     /* TODO */
   },

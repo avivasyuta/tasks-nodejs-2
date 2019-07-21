@@ -2,8 +2,12 @@
 
 ## Создание модели Order
 
-Для начала необходимо создать саму модель заказа, где должно быть указано перечень продуктов, текущий пользователь, 
+Для начала необходимо создать саму модель заказа, где должны быть указаны заказанный продукт, текущий пользователь, 
 адрес и телефон.
+Для проверки телефона воспользуемся свойством `match`, где с помощью регулярного выражения описать строку, 
+которая будет соответствовать требованиям. Регулярное выражение должно выглядеть следующим образом - `/^\+?\d{6,14}$/`.
+В случае, если переданная в поле phone строка не будет соответствовать указанному регулярному выражению - при сохранении 
+будет выбрасываться ошибка валидации.
 
 После описания всех необходимых полей схема должна выглядеть следующим образом
 
@@ -16,14 +20,15 @@ const orderSchema = new mongoose.Schema({
     required: true,
     ref: 'User',
   },
-  products: [{
+  product: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'Product',
-  }],
+  },
   phone: {
     type: String,
     required: true,
+    match: /\+?\d{6,14}/,
   },
   address: {
     type: String,
@@ -34,8 +39,8 @@ const orderSchema = new mongoose.Schema({
 
 ## Создание заказа
 
-Тут нам необходимо просто необходимо взять тело запроса и на основании него создать заказ, сохранив его в базу.
-Единственный ньюанс заключается в том, что id пользователя нужно брать из контекста, а не из запроса 
+Для создания заказа необходимо взять тело запроса и на основании него создать заказ, сохранив его в базу.
+Единственный нюанс заключается в том, что id пользователя нужно брать из контекста, а не из запроса 
 (иначе можно будет создать заказ любому пользователю, даже несуществующему)
 
 В ответ нам надо вернуть id только что созданного заказа;
@@ -63,15 +68,34 @@ module.exports.checkout = async function checkout(ctx, next) {
 
 ## Получение списка заказов
 
-Тут все достаточно просто - нам необходимо получить из базы данных все заказы текущего пользователя.
-Для удобства отображения заказов лучше сразу вернуть и описание заказанных продуктов, иначе клиенту 
-придется делать дополнительные запросы для получения информации о заказанных продуктах
+Тут необходимо получить из базы данных все заказы текущего пользователя.
+Для удобства отображения заказов лучше сразу вернуть и описание заказанного продукта, иначе клиенту 
+придется делать дополнительные запросы для получения дополнительной информации о заказе.
 
+Тут мы снова будем использовать специальную функцию, которая будет преобразовывать модель в нужный формат ответа.
+
+Функция преобразования будет выглядеть слудющим образом:
+```js
+// ./mappers/order.js
+
+module.exports = function mapOrder(order) {
+  return {
+    id: order.id,
+    user: order.user,
+    product: mapProduct(order.product),
+    phone: order.phone,
+    address: order.address,
+  };
+};
+```
+
+Сам же контроллер:
 ```js
 // ./controllers/orders.js
 
-module.exports.list = async function ordersList(ctx, next) {
-  ctx.body = await Order.find({user: ctx.user.id}).populate('products');
+module.exports.getOrdersList = async function ordersList(ctx, next) {
+  const order = await Order.find({user: ctx.user.id}).populate('product');
+  ctx.body = order.map(mapOrder);
 };
 ```
 
@@ -84,7 +108,10 @@ module.exports.list = async function ordersList(ctx, next) {
 
 ```js
 // ./app.js
+const {getOrdersList, checkout} = require('./controllers/orders');
 
-router.get('/orders', mustBeAuthenticated, handleMongooseValidationError, orders.list);
-router.post('/orders', mustBeAuthenticated, handleMongooseValidationError, orders.checkout);
+// ...
+
+router.get('/orders', mustBeAuthenticated, getOrdersList);
+router.post('/orders', mustBeAuthenticated, handleMongooseValidationError, checkout);
 ```
