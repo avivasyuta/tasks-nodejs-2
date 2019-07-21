@@ -1,7 +1,7 @@
 module.exports = {
   mongodb: {
     uri: (process.env.NODE_ENV === 'test')
-      ? 'mongodb://localhost/7-module-2-task'
+      ? 'mongodb://localhost/9-module-1-task'
       : 'mongodb://localhost/any-shop',
   },
   crypto: {
@@ -34,5 +34,9 @@ module.exports = {
         scope: ['email'],
       },
     },
+  },
+  mailer: {
+    user: '',
+    password: '',
   },
 };
