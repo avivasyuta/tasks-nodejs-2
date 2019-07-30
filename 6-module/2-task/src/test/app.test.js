@@ -114,7 +114,7 @@ describe('6-module-2-task', () => {
               products[0],
               'товар содержит поля title, id, category, subcategory, price, description и images'
           ).to.have.keys([
-            'title', 'id', 'category', 'subcategory', 'price', 'description', 'images'
+            'title', 'id', 'category', 'subcategory', 'price', 'description', 'images',
           ]);
 
           expect(
@@ -132,8 +132,8 @@ describe('6-module-2-task', () => {
 
         it('сервер должен вернуть статус 404', async () => {
           const response = await client
-            .get('http://localhost:3000/api/products/5d208f60e13792398c2aa944');
-          
+              .get('http://localhost:3000/api/products/5d208f60e13792398c2aa944');
+
           expect(response.status).to.equal(404);
         });
 
