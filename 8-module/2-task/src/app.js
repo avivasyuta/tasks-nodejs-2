@@ -1,21 +1,19 @@
 const Koa = require('koa');
 const uuid = require('uuid/v4');
 const Router = require('koa-router');
-const cors = require('@koa/cors');
 const handleMongooseValidationError = require('./libs/validationErrors');
-const Session = require('./models/Session');
 const mustBeAuthenticated = require('./libs/mustBeAuthenticated');
-
 const {productsBySubcategory, productList, productById} = require('./controllers/products');
 const {categoryList} = require('./controllers/categories');
 const {login} = require('./controllers/login');
 const {oauth, oauthCallback} = require('./controllers/oauth');
 const {me} = require('./controllers/me');
 const {register, confirm} = require('./controllers/registration');
+const {checkout, getOrdersList} = require('./controllers/orders');
+const Session = require('./models/Session');
 
 const app = new Koa();
 
-app.use(cors());
 app.use(require('koa-bodyparser')());
 
 app.use(async (ctx, next) => {
@@ -34,7 +32,7 @@ app.use(async (ctx, next) => {
 });
 
 app.use((ctx, next) => {
-  ctx.login = async function login(user) {
+  ctx.login = async function(user) {
     const token = uuid();
     await Session.create({token, user, lastVisit: new Date()});
 
@@ -78,8 +76,8 @@ router.get('/me', mustBeAuthenticated, me);
 router.post('/register', handleMongooseValidationError, register);
 router.post('/confirm', confirm);
 
-router.get('/orders' /* TODO */);
-router.post('/orders', /* TODO */);
+router.get('/orders', getOrdersList);
+router.post('/orders', checkout);
 
 app.use(router.routes());
 

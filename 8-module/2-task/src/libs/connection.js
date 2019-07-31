@@ -6,8 +6,6 @@ mongoose.set('useNewUrlParser', true);
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 
-mongoose.set('debug', config.mongodb.debug);
-
 mongoose.plugin(beautifyUnique);
 
 module.exports = mongoose.createConnection(config.mongodb.uri);

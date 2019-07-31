@@ -1,7 +1,7 @@
 const passport = require('../libs/passport');
 const config = require('../config');
 
-exports.oauth = async function oauth(ctx, next) {
+module.exports.oauth = async function oauth(ctx, next) {
   const provider = ctx.params.provider;
 
   await passport.authenticate(
@@ -13,7 +13,7 @@ exports.oauth = async function oauth(ctx, next) {
   ctx.body = {status: 'ok', location: ctx.response.get('location')};
 };
 
-exports.oauthCallback = async function oauthCallback(ctx, next) {
+module.exports.oauthCallback = async function oauthCallback(ctx, next) {
   const provider = ctx.request.body.provider;
 
   await passport.authenticate(provider, async (err, user, info) => {
