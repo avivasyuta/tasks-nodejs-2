@@ -8,7 +8,7 @@ module.exports.checkout = async function checkout(ctx, next) {
     phone: ctx.request.body.phone,
     address: ctx.request.body.address,
   });
-  
+
   ctx.body = {order: order.id};
 };
 
