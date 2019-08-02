@@ -15,7 +15,14 @@ const orderSchema = new mongoose.Schema({
   phone: {
     type: String,
     required: true,
-    match: /\+?\d{6,14}/,
+    validate: [
+      {
+        validator(value) {
+          return /\+?\d{6,14}/.test(value);
+        },
+        message: 'Неверный формат номера телефона.',
+      },
+    ],
   },
   address: {
     type: String,

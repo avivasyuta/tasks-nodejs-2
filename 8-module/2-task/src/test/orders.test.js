@@ -190,7 +190,7 @@ describe('8-module-2-task', () => {
           .that.include('required');
       expect(body.errors, 'phone - свойство должно соответствовать шаблону')
           .to.have.property('phone')
-          .that.include('invalid');
+          .that.equal('Неверный формат номера телефона.');
       expect(body.errors, 'address - свойство обязательно').to.have.property('address')
           .that.include('required');
     });

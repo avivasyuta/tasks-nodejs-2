@@ -3,7 +3,10 @@ const uuid = require('uuid/v4');
 const Router = require('koa-router');
 const handleMongooseValidationError = require('./libs/validationErrors');
 const mustBeAuthenticated = require('./libs/mustBeAuthenticated');
-const {productsBySubcategory, productList, productById} = require('./controllers/products');
+const {recommendationsList} = require('./controllers/recommendations');
+const {
+  productsBySubcategory, productsByQuery, productList, productById
+} = require('./controllers/products');
 const {categoryList} = require('./controllers/categories');
 const {login} = require('./controllers/login');
 const {oauth, oauthCallback} = require('./controllers/oauth');
@@ -63,8 +66,9 @@ router.use(async (ctx, next) => {
   return next();
 });
 
+router.get('/recommendations', recommendationsList);
 router.get('/categories', categoryList);
-router.get('/products', productsBySubcategory, productList);
+router.get('/products', productsBySubcategory, productsByQuery, productList);
 router.get('/products/:id', productById);
 
 router.post('/login', login);
