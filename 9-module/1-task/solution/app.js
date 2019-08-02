@@ -9,6 +9,7 @@ const {login} = require('./controllers/login');
 const {oauth, oauthCallback} = require('./controllers/oauth');
 const {me} = require('./controllers/me');
 const {register, confirm} = require('./controllers/registration');
+const {checkout, getOrdersList} = require('./controllers/orders');
 const {messageList} = require('./controllers/messages');
 const Session = require('./models/Session');
 
@@ -35,10 +36,10 @@ app.use((ctx, next) => {
   ctx.login = async function(user) {
     const token = uuid();
     await Session.create({token, user, lastVisit: new Date()});
-    
+
     return token;
   };
-  
+
   return next();
 });
 
@@ -47,17 +48,17 @@ const router = new Router({prefix: '/api'});
 router.use(async (ctx, next) => {
   const header = ctx.request.get('Authorization');
   if (!header) return next();
-  
+
   const token = header.split(' ')[1];
   if (!token) return next();
-  
+
   const session = await Session.findOne({token}).populate('user');
   if (!session) {
     ctx.throw(401, 'Неверный аутентификационный токен');
   }
   session.lastVisit = new Date();
   await session.save();
-  
+
   ctx.user = session.user;
   return next();
 });
@@ -73,8 +74,11 @@ router.post('/oauth_callback', handleMongooseValidationError, oauthCallback);
 
 router.get('/me', mustBeAuthenticated, me);
 
-router.post('/register', register);
+router.post('/register', handleMongooseValidationError, register);
 router.post('/confirm', confirm);
+
+router.get('/orders', mustBeAuthenticated, getOrdersList);
+router.post('/orders', mustBeAuthenticated, handleMongooseValidationError, checkout);
 
 router.get('/messages', mustBeAuthenticated, messageList);
 
