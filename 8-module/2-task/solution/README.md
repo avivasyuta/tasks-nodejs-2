@@ -48,12 +48,26 @@ const orderSchema = new mongoose.Schema({
 пользователя нужно брать из объекта `ctx.user`, а не из тела запроса. 
 После успешного создания заказа необходимо отправить пользователю письмо с подтверждением, 
 где должен быть указан номер заказа и название заказанного продукта.
-Для того что бы получить название заказанного продукта можно воспользоваться методом `populate`
-`mongoose` документа. При этом надо вызвать так же метод `execPopulate`, который вернет промис, 
-результатом разрешения которого будет объект заказа с заполненным полем `product`.
-В ответ нам надо вернуть id только что созданного заказа.
+Нам достаточно в письме указать номер заказа и название заказанного продукта. Для получения названия 
+продукта воспользуемся методом `Product.findById`. Что бы привести имеющиеся у нас данные (документ заказа 
+и документ продукта) сделаем функцию `mapOrderConfirmation`, которая будет принимать документы заказа и 
+продукта в качестве аргументов и возвращать объект с данныими, необходимыми для формирования письме.
+Разместим эту функцию в папке `mappers`.
 
-Обработчик создания заказа может в итоге выглядеть следующим образом:
+Функция мапинга может выглядеть таким образом:
+
+```js
+module.exports = function mapOrderConfirmation(order, product) {
+  return {
+    id: order.id,
+    product: {
+      title: product.title,
+    },
+  };
+};
+```
+
+A обработчик создания заказа может в итоге выглядеть следующим образом:
 
 ```js
 module.exports.checkout = async function checkout(ctx, next) {
@@ -66,11 +80,11 @@ module.exports.checkout = async function checkout(ctx, next) {
     user: ctx.user,
   });
 
-  await order.populate('product').execPopulate();
+  const product = await Product.findById(order.product);
 
   await sendMail({
     template: 'order-confirmation',
-    locals: order,
+    locals: mapOrderConfirmation(order, product),
     to: ctx.user.email,
     subject: 'Подтверждение создания заказа',
   });

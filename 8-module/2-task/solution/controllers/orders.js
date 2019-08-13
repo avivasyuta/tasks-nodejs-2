@@ -1,5 +1,7 @@
 const Order = require('../models/Order');
+const Product = require('../models/Product');
 const mapOrder = require('../mappers/order');
+const mapOrderConfirmation = require('../mappers/orderConfirmation');
 const sendMail = require('../libs/sendMail');
 
 module.exports.checkout = async function checkout(ctx, next) {
@@ -10,11 +12,11 @@ module.exports.checkout = async function checkout(ctx, next) {
     address: ctx.request.body.address,
   });
 
-  await order.populate('product').execPopulate();
+  const product = await Product.findById(order.product);
 
   await sendMail({
     template: 'order-confirmation',
-    locals: order,
+    locals: mapOrderConfirmation(order, product),
     to: ctx.user.email,
     subject: 'Подтверждение создания заказа',
   });
