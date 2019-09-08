@@ -3,12 +3,12 @@ const connection = require('../libs/connection');
 
 const orderSchema = new mongoose.Schema({
   user: {
-    type: mongoose.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'User',
   },
   product: {
-    type: mongoose.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
     ref: 'Product',
   },
