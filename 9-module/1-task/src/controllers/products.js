@@ -14,7 +14,6 @@ module.exports.productsBySubcategory = async function productsBySubcategory(ctx,
 module.exports.productsByQuery = async function productsByQuery(ctx, next) {
   const {query} = ctx.query;
   if (!query) return next();
-
   const products = await Product
     .find({$text: {$search: query}}, {score: {$meta: 'textScore'}})
     .sort({score: {$meta: 'textScore'}})

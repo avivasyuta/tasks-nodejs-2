@@ -48,7 +48,7 @@ describe('8-module-2-task', () => {
 
       expect(userField, 'у модели есть свойство user').to.be.not.undefined;
       expect(userField.required, 'свойство user является обязательным').to.be.true;
-      expect(userField.type, 'тип свойства user - ObjectId').to.be.equal(mongoose.Schema.Types.t ObjectId);
+      expect(userField.type, 'тип свойства user - ObjectId').to.be.equal(mongoose.Schema.Types.ObjectId);
       expect(userField.ref, 'свойство user ссылается на модель `User`').to.be.equal('User');
     });
 
