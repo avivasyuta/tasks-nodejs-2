@@ -17,7 +17,7 @@
 пользователя, поэтому объявление поля выглядит следующим образом:
 ```js
 user: {
-  type: mongoose.Types.ObjectId,
+  type: mongoose.Schema.Types.ObjectId,
   required: true,
   ref: 'User',
 }
