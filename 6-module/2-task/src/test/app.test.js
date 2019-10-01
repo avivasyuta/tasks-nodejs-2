@@ -2,6 +2,8 @@ const app = require('../app');
 const Category = require('../models/Category');
 const Product = require('../models/Product');
 const connection = require('../libs/connection');
+const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 const axios = require('axios');
 const expect = require('chai').expect;
 
@@ -10,7 +12,7 @@ const client = axios.create({
 });
 
 describe('6-module-2-task', () => {
-  describe('получение категорий и товаров', function() {
+  describe('получение категорий и товаров', function () {
     let _server;
     let category;
     let product;
@@ -84,7 +86,7 @@ describe('6-module-2-task', () => {
       describe('получение списка товаров по подкатегории', () => {
         it('если товаров не найдено - должен возвращаться пустой массив', async () => {
           const response = await client.get('http://localhost:3000/api/products', {
-            params: {subcategory: 'invalid-subcategory'},
+            params: {subcategory: (new ObjectId()).toString()},
           });
 
           expect(
