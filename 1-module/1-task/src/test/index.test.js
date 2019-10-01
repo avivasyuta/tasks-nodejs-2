@@ -1,4 +1,5 @@
 const fs = require('fs');
+const {EOL} = require('os');
 const {execSync} = require('child_process');
 const path = require('path');
 const expect = require('chai').expect;
@@ -16,7 +17,7 @@ describe('1-module-1-task', () => {
           {
             encoding: 'utf-8',
           }
-      );
+      ).replace(/(\r\n)|(\r)/g, EOL);
 
       const output = execSync(`node ${path.join(__dirname, '../index.js')}`, {
         encoding: 'utf-8',
