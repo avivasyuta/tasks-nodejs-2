@@ -64,10 +64,10 @@ router.post('/publish', async (ctx, next) => {
 ```js
 router.get('/subscribe', async (ctx, next) => {
   const message = await new Promise((resolve, reject) => {
-    clients.push(resolve);
-
+    clients.add(resolve);
+    
     ctx.res.on('close', function() {
-      clients.remove(resolve);
+      clients.delete(resolve);
       resolve();
     });
   });
