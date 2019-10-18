@@ -1,5 +1,5 @@
 const server = require('../server');
-const request = require('request');
+const http = require('http');
 const expect = require('chai').expect;
 const fse = require('fs-extra');
 const path = require('path');
@@ -13,6 +13,7 @@ describe('4-module-1-task', () => {
       fse.emptyDirSync(filesFolder);
       server.listen(3001, () => done());
     });
+
     after((done) => {
       fse.emptyDirSync(filesFolder);
       fse.writeFileSync(path.join(filesFolder, '.gitkeep'), '');
@@ -26,46 +27,50 @@ describe('4-module-1-task', () => {
     describe('GET', () => {
       it('файл отдается по запросу', (done) => {
         fse.copyFileSync(
-            path.join(fixturesFolder, 'index.js'),
-            path.join(filesFolder, 'index.js')
+          path.join(fixturesFolder, 'index.js'),
+          path.join(filesFolder, 'index.js')
         );
 
         const content = fse.readFileSync(path.join(filesFolder, 'index.js'));
-
-        request.get('http://localhost:3001/index.js', (err, response, body) => {
-          if (err) return done(err);
-
+        
+        const request = http.request('http://localhost:3001/index.js', async response => {
           expect(response.statusCode, 'статус код ответа 200').to.equal(200);
+          
+          const body = [];
+          for await (const chunk of response) {
+            body.push(chunk);
+          }
+  
           expect(
-              body,
-              'ответ сервера - исходный файл index.js'
-          ).to.equal(content.toString('utf-8'));
+            Buffer.concat(body).equals(content),
+            'ответ сервера - исходный файл index.js'
+          ).to.be.true;
           done();
         });
+  
+        request.on('error', done);
+        request.end();
+        
       });
 
       it('если файла нет - отдается 404', (done) => {
-        request.get(
-            'http://localhost:3001/not_exists.png',
-            (error, response) => {
-              if (error) return done(error);
-
-              expect(response.statusCode).to.equal(404);
-              done();
-            }
-        );
+        const request = http.request('http://localhost:3001/not_exists.png', response => {
+          expect(response.statusCode, 'статус код ответа 404').to.equal(404);
+          done();
+        });
+  
+        request.on('error', done);
+        request.end();
       });
 
       it('если путь вложенный - возвращается ошибка 400', (done) => {
-        request.get(
-            'http://localhost:3001/nested/path',
-            (error, response) => {
-              if (error) return done(error);
-
-              expect(response.statusCode).to.equal(400);
-              done();
-            }
-        );
+        const request = http.request('http://localhost:3001/nested/path', response => {
+          expect(response.statusCode, 'статус код ответа 400').to.equal(400);
+          done();
+        });
+        
+        request.on('error', done);
+        request.end();
       });
     });
   });
