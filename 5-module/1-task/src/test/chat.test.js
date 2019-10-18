@@ -1,4 +1,4 @@
-const request = require('request-promise');
+const axios = require('axios');
 const app = require('../app');
 const expect = require('chai').expect;
 
@@ -20,33 +20,24 @@ describe('5-module-1-task', () => {
         const message = 'text';
 
         const subscribers = Promise.all([
-          request({
-            method: 'GET',
-            url: 'http://127.0.0.1:3000/subscribe',
+          axios.get('http://127.0.0.1:3000/subscribe', {
             timeout: 500,
           }),
-          request({
-            method: 'GET',
-            url: 'http://127.0.0.1:3000/subscribe',
+          axios.get('http://127.0.0.1:3000/subscribe', {
             timeout: 500,
           }),
         ]);
 
         await sleep(50);
 
-        await request({
-          method: 'POST',
-          url: 'http://127.0.0.1:3000/publish',
-          json: true,
-          body: {
-            message,
-          },
+        await axios.post('http://127.0.0.1:3000/publish', {
+          message,
         });
 
         const messages = await subscribers;
 
-        messages.forEach((msg) => {
-          expect(msg, 'каждый подписчик должен получить исходное сообщение').to.equal(message);
+        messages.forEach(response => {
+          expect(response.data, 'каждый подписчик должен получить исходное сообщение').to.equal(message);
         });
       });
 
@@ -54,43 +45,30 @@ describe('5-module-1-task', () => {
         const message = 'text';
 
         const subscribers = Promise.all([
-          request({
-            method: 'GET',
-            url: 'http://127.0.0.1:3000/subscribe',
+          axios.get('http://127.0.0.1:3000/subscribe', {
             timeout: 500,
           }),
-          request({
-            method: 'GET',
-            url: 'http://127.0.0.1:3000/subscribe',
+          axios.get('http://127.0.0.1:3000/subscribe', {
             timeout: 500,
           }),
         ]);
 
         await sleep(50);
 
-        await request({
-          method: 'POST',
-          url: 'http://127.0.0.1:3000/publish',
-          json: true,
-          simple: false,
-          body: {},
+        await axios.post('http://127.0.0.1:3000/publish', {}, {
+          validateStatus: () => true,
         });
 
         await sleep(50);
 
-        await request({
-          method: 'POST',
-          url: 'http://127.0.0.1:3000/publish',
-          json: true,
-          body: {
-            message,
-          },
+        await axios.post('http://127.0.0.1:3000/publish', {
+          message,
         });
 
         const messages = await subscribers;
 
-        messages.forEach((msg) => {
-          expect(msg).to.equal(message);
+        messages.forEach(response => {
+          expect(response.data, 'каждый подписчик должен получить исходное сообщение').to.equal(message);
         });
       });
     });
