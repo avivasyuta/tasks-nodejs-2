@@ -11,7 +11,7 @@ describe('4-module-2-task', () => {
   describe('тесты на файловый сервер', () => {
     before((done) => {
       fse.emptyDirSync(filesFolder);
-      server.listen(3001, () => done());
+      server.listen(3001, done);
     });
 
     after((done) => {
