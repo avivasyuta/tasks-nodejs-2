@@ -40,7 +40,7 @@ describe('7-module-1-task', () => {
         if (err) return done(err);
 
         expect(user).to.be.false;
-        expect(info).to.equal('Невереный пароль');
+        expect(info).to.equal('Неверный пароль');
         done();
       });
     });

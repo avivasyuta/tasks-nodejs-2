@@ -51,7 +51,10 @@ describe('8-module-2-task', () => {
 
       expect(userField, 'у модели есть свойство user').to.be.not.undefined;
       expect(userField.required, 'свойство user является обязательным').to.be.true;
-      expect(userField.type, 'тип свойства user - ObjectId').to.be.equal(mongoose.Schema.Types.ObjectId);
+      expect(
+          userField.type,
+          'тип свойства user - ObjectId'
+      ).to.be.equal(mongoose.Schema.Types.ObjectId);
       expect(userField.ref, 'свойство user ссылается на модель `User`').to.be.equal('User');
     });
 
@@ -60,9 +63,12 @@ describe('8-module-2-task', () => {
 
       expect(productField, 'у модели есть свойство product').to.be.not.undefined;
       expect(productField.required, 'свойство product является обязательным').to.be.true;
-      expect(productField.type, 'тип свойства product - ObjectId').to.be.equal(mongoose.Schema.Types.ObjectId);
+      expect(
+          productField.type,
+          'тип свойства product - ObjectId'
+      ).to.be.equal(mongoose.Schema.Types.ObjectId);
       expect(productField.ref, 'свойство product ссылается на модель `Product`')
-        .to.be.equal('Product');
+          .to.be.equal('Product');
     });
 
     it('должна содержать обязательное свойство `address`', () => {
@@ -150,17 +156,20 @@ describe('8-module-2-task', () => {
       });
 
       expect(response.body, 'тело ответа должно содержать id заказа').to.have.property('order');
-      expect(response.body.order, 'id заказа должен быть валдиным ObjectId').to.satisfy(ObjectId.isValid);
+      expect(
+        response.body.order,
+        'id заказа должен быть валдиным ObjectId'
+      ).to.satisfy(ObjectId.isValid);
 
       const order = await Order.findById(response.body.order);
 
       expect(order, 'созданный зказа должен быть в базе данных').to.be.not.null;
       expect(order.product.toString(), 'созданный заказ должен содержать переданный продукт')
-        .to.equal(body.product.toString());
+          .to.equal(body.product.toString());
       expect(order.phone, 'созданный заказ должен содержать переданный номер телефона')
-        .to.be.equal(body.phone);
+          .to.be.equal(body.phone);
       expect(order.address, 'созданный заказ должен содержать переданный адресс')
-        .to.be.equal(body.address);
+          .to.be.equal(body.address);
     });
 
     it('отправить письмо пользователю об успешном создании заказа', async () => {
@@ -218,7 +227,7 @@ describe('8-module-2-task', () => {
       });
 
       expect(get(envelope, 'to[0]'), 'письмо отправлено на почту пользователя').to
-        .equal(user.email);
+          .equal(user.email);
     });
 
     it('использовать id авторизованного пользователя', async () => {
@@ -306,12 +315,12 @@ describe('8-module-2-task', () => {
       expect(statusCode, 'статус код ответа должен быть 400').to.be.equal(400);
       expect(body, 'тело ответа должно содержать объект с ошибками').to.have.property('errors');
       expect(body.errors, 'products - ожидается получить ObjectId').to.have.property('product')
-        .that.include('required');
+          .that.include('required');
       expect(body.errors, 'phone - свойство должно соответствовать шаблону')
-        .to.have.property('phone')
-        .that.equal('Неверный формат номера телефона.');
+          .to.have.property('phone')
+          .that.equal('Неверный формат номера телефона.');
       expect(body.errors, 'address - свойство обязательно').to.have.property('address')
-        .that.include('required');
+          .that.include('required');
     });
 
     it('вернуть ошибку со статусом 401 если пользователь не авторизован', async () => {
@@ -322,7 +331,6 @@ describe('8-module-2-task', () => {
 
       expect(statusCode, 'статус код ответа должен быть 401').to.be.equal(401);
     });
-
   });
 
   describe('запрос GET /api/orders должен', () => {
@@ -436,7 +444,7 @@ describe('8-module-2-task', () => {
       expect(body.orders, 'ключ orders в ответе должел быть массивом').to.be.an('array');
       expect(body.orders, 'в ответе должно быть 2 заказа').to.have.lengthOf(2);
       expect(body.orders, 'ответ должен содержать только заказы текущего пользователя')
-        .to.satisfy(() => body.orders.every((order) => order.user = user.id));
+          .to.satisfy(() => body.orders.every((order) => order.user = user.id));
     });
 
     it('вернуть ошибку со статусом 401 если пользователь не авторизован', async () => {

@@ -13,7 +13,7 @@ module.exports = new LocalStrategy(
         const isValidPassword = await user.checkPassword(password);
 
         if (!isValidPassword) {
-          return done(null, false, 'Невереный пароль');
+          return done(null, false, 'Неверный пароль');
         }
 
         return done(null, user);

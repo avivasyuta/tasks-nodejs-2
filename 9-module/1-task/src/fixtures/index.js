@@ -36,7 +36,7 @@ const products = require('./products');
       subcategories: c.subcategories.reduce((r, s) => {
         r[s.title] = s.id;
         return r;
-      }, {})
+      }, {}),
     };
   }
 

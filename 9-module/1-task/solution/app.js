@@ -5,7 +5,7 @@ const handleMongooseValidationError = require('./libs/validationErrors');
 const mustBeAuthenticated = require('./libs/mustBeAuthenticated');
 const {recommendationsList} = require('./controllers/recommendations');
 const {
-  productsBySubcategory, productsByQuery, productList, productById
+  productsBySubcategory, productsByQuery, productList, productById,
 } = require('./controllers/products');
 const {categoryList} = require('./controllers/categories');
 const {login} = require('./controllers/login');
