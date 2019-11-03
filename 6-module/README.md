@@ -107,7 +107,7 @@ const schema = new mongoose.Schema({
     unique: 'Такое имя уже существует',
   },
   friends: [{
-    type: mongoose.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   }]
 });

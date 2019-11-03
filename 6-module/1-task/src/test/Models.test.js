@@ -71,14 +71,14 @@ describe('6-module-1-task', () => {
     it('поле category имеет правильную конфигурацию', () => {
       const category = Product.schema.obj.category;
 
-      expect(category.type, 'category - ObjectId').to.eql(mongoose.Types.ObjectId);
+      expect(category.type, 'category - ObjectId').to.eql(mongoose.Schema.Types.ObjectId);
       expect(category.required, 'category - обязательное поле').to.be.true;
     });
 
     it('поле subcategory имеет правильную конфигурацию', () => {
       const subcategory = Product.schema.obj.subcategory;
 
-      expect(subcategory.type, 'subcategory - ObjectId').to.eql(mongoose.Types.ObjectId);
+      expect(subcategory.type, 'subcategory - ObjectId').to.eql(mongoose.Schema.Types.ObjectId);
       expect(subcategory.required, 'subcategory - обязательное поле').to.be.true;
     });
 
