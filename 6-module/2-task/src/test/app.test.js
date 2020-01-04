@@ -84,6 +84,24 @@ describe('6-module-2-task', () => {
 
     describe('товары', () => {
       describe('получение списка товаров по подкатегории', () => {
+        it('если товары есть в базе - должен вернуться массив с товарами', async () => {
+          const response = await client.get('http://localhost:3000/api/products');
+
+          expect(
+              response.data,
+              'ответ сервера содержит массив .products'
+          ).to.have.property('products').that.is.an('array');
+
+          expect(
+              response.data.products,
+              'массив должен содержать существующие продукты в базе',
+          ).to.be.lengthOf(1);
+          expect(
+              response.data.products[0],
+              'id должен соответствовать id созданного продукта',
+          ).to.have.property('id', product.id);
+        });
+
         it('если товаров не найдено - должен возвращаться пустой массив', async () => {
           const response = await client.get('http://localhost:3000/api/products', {
             params: {subcategory: (new ObjectId()).toString()},
