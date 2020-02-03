@@ -73,7 +73,7 @@ describe('4-module-2-task', () => {
 
       it('при попытке создания слишком большого файла - ошибка 413', (done) => {
         const request = http.request(
-            'http://localhost:3001/small.png',
+            'http://localhost:3001/big.png',
             {method: 'POST'},
             (response) => {
               expect(
