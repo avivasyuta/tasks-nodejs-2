@@ -10,5 +10,4 @@ module.exports = new VkontakteStrategy({
   session: false,
 }, function(accessToken, refreshToken, params, profile, done) {
   authenticate('vkontakte', params.email, profile.displayName, done);
-}
-);
+});

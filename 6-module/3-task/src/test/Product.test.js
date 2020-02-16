@@ -36,6 +36,9 @@ describe('6-module-3-task', () => {
       subcategory: category.subcategories[0].id,
       images: ['image1'],
     });
+  
+    await Category.syncIndexes();
+    await Product.syncIndexes();
 
     await new Promise((resolve) => {
       _server = app.listen(3000, resolve);

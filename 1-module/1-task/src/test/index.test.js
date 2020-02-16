@@ -17,11 +17,11 @@ describe('1-module-1-task', () => {
           {
             encoding: 'utf-8',
           }
-      ).replace(/(\r\n)|(\r)|(\n)/g, EOL);
+      ).replace(/\r\n|\r|\n/g, EOL);
 
       const output = execSync(`node ${path.join(__dirname, '../index.js')}`, {
         encoding: 'utf-8',
-      });
+      }).replace(/\r\n|\r|\n/g, EOL);
 
       expect(solution.trim()).to.equal(output.trim());
     });

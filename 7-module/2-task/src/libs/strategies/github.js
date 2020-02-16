@@ -11,5 +11,4 @@ module.exports = new GithubStrategy({
   session: false,
 }, function(accessToken, refreshToken, profile, done) {
   authenticate('github', get(profile, 'emails[0].value'), profile.username, done);
-}
-);
+});
