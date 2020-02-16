@@ -11,5 +11,4 @@ module.exports = new FacebookStrategy({
   session: false,
 }, function(accessToken, refreshToken, profile, done) {
   authenticate('facebook', get(profile, 'emails[0].value'), profile.displayName, done);
-}
-);
+});

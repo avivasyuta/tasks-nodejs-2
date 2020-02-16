@@ -1,12 +1,13 @@
+const path = require('path');
 const Koa = require('koa');
 const Router = require('koa-router');
 const handleMongooseValidationError = require('./libs/validationErrors');
-const {productsBySubcategory, productList, productById} = require('./controllers/products');
-const {categoryList} = require('./controllers/categories');
 const {login} = require('./controllers/login');
 const {oauth, oauthCallback} = require('./controllers/oauth');
 
 const app = new Koa();
+
+app.use(require('koa-static')(path.join(__dirname, 'public')));
 app.use(require('koa-bodyparser')());
 
 app.use(async (ctx, next) => {
@@ -26,15 +27,22 @@ app.use(async (ctx, next) => {
 
 const router = new Router({prefix: '/api'});
 
-router.get('/categories', categoryList);
-router.get('/products', productsBySubcategory, productList);
-router.get('/products/:id', productById);
-
 router.post('/login', login);
 
 router.get('/oauth/:provider', oauth);
 router.post('/oauth_callback', handleMongooseValidationError, oauthCallback);
 
 app.use(router.routes());
+
+// this for HTML5 history in browser
+const fs = require('fs');
+
+const index = fs.readFileSync(path.join(__dirname, 'public/index.html'));
+app.use(async (ctx) => {
+  if (ctx.url.startsWith('/api') || ctx.method !== 'GET') return;
+
+  ctx.set('content-type', 'text/html');
+  ctx.body = index;
+});
 
 module.exports = app;
