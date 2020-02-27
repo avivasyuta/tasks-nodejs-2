@@ -1,6 +1,6 @@
 const User = require('../models/User');
 const connection = require('../libs/connection');
-const users = require('../../../../__data/users');
+const users = require('../../../__data/users');
 
 (async () => {
   await User.deleteMany();
