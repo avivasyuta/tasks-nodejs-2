@@ -2,7 +2,7 @@ const connection = require('../libs/connection');
 const localStrategy = require('../libs/strategies/local');
 const expect = require('chai').expect;
 const User = require('../models/User');
-const users = require('../fixtures/users');
+const users = require('../fixtures');
 
 describe('7-module-1-task', () => {
   describe('passport local strategy', function() {
