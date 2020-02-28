@@ -1,6 +1,6 @@
 const User = require('../models/User');
 const connection = require('../libs/connection');
-const users = require('../../../__data/users');
+const users = require(`${process.cwd()}/__data/users`);
 
 (async () => {
   await User.deleteMany();
@@ -10,7 +10,7 @@ const users = require('../../../__data/users');
     await u.setPassword(user.password);
     await u.save();
   }
-  
+
   connection.close();
   console.log(`All done, ${users.users.length} users have been saved in DB`);
 })();

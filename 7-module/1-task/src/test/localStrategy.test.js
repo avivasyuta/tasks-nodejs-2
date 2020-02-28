@@ -2,14 +2,14 @@ const connection = require('../libs/connection');
 const localStrategy = require('../libs/strategies/local');
 const expect = require('chai').expect;
 const User = require('../models/User');
-const users = require('../fixtures');
+const users = require(`${process.cwd()}/__data/users`);
 
 describe('7-module-1-task', () => {
-  describe('passport local strategy', function() {
+  describe('passport local strategy', function () {
     before(async () => {
       await User.deleteMany();
 
-      for (const user of users) {
+      for (const user of users.users) {
         const u = new User(user);
         await u.setPassword(user.password);
         await u.save();
