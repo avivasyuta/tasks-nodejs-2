@@ -2,14 +2,14 @@ const connection = require('../libs/connection');
 const authenticate = require('../libs/strategies/authenticate');
 const expect = require('chai').expect;
 const User = require('../models/User');
-const users = require('../fixtures/users');
+const users = require('../../../__data/users');
 
 describe('7-module-2-task', () => {
   describe('функция аутентификации', function() {
     before(async () => {
       await User.deleteMany();
 
-      for (const user of users) {
+      for (const user of users.users) {
         const u = new User(user);
         await u.setPassword(user.password);
         await u.save();
