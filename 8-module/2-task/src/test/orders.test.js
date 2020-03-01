@@ -5,10 +5,10 @@ const app = require('../app');
 const connection = require('../libs/connection');
 const transportEngine = require('../libs/sendMail').transportEngine;
 
-const request = require('request-promise').defaults({
-  resolveWithFullResponse: true,
-  simple: false,
-  json: true,
+const axios = require('axios');
+const request = axios.create({
+  responseType: 'json',
+  validateStatus: () => true,
 });
 
 const Order = require('./../models/Order');
@@ -52,8 +52,8 @@ describe('8-module-2-task', () => {
       expect(userField, 'у модели есть свойство user').to.be.not.undefined;
       expect(userField.required, 'свойство user является обязательным').to.be.true;
       expect(
-          userField.type,
-          'тип свойства user - ObjectId'
+        userField.type,
+        'тип свойства user - ObjectId'
       ).to.be.equal(mongoose.Schema.Types.ObjectId);
       expect(userField.ref, 'свойство user ссылается на модель `User`').to.be.equal('User');
     });
@@ -64,11 +64,11 @@ describe('8-module-2-task', () => {
       expect(productField, 'у модели есть свойство product').to.be.not.undefined;
       expect(productField.required, 'свойство product является обязательным').to.be.true;
       expect(
-          productField.type,
-          'тип свойства product - ObjectId'
+        productField.type,
+        'тип свойства product - ObjectId'
       ).to.be.equal(mongoose.Schema.Types.ObjectId);
       expect(productField.ref, 'свойство product ссылается на модель `Product`')
-          .to.be.equal('Product');
+        .to.be.equal('Product');
     });
 
     it('должна содержать обязательное свойство `address`', () => {
@@ -149,27 +149,27 @@ describe('8-module-2-task', () => {
       const response = await request({
         method: 'post',
         url: serverURL,
-        body,
+        data: body,
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
 
-      expect(response.body, 'тело ответа должно содержать id заказа').to.have.property('order');
+      expect(response.data, 'тело ответа должно содержать id заказа').to.have.property('order');
       expect(
-        response.body.order,
+        response.data.order,
         'id заказа должен быть валдиным ObjectId'
       ).to.satisfy(ObjectId.isValid);
 
-      const order = await Order.findById(response.body.order);
+      const order = await Order.findById(response.data.order);
 
       expect(order, 'созданный зказа должен быть в базе данных').to.be.not.null;
       expect(order.product.toString(), 'созданный заказ должен содержать переданный продукт')
-          .to.equal(body.product.toString());
+        .to.equal(body.product.toString());
       expect(order.phone, 'созданный заказ должен содержать переданный номер телефона')
-          .to.be.equal(body.phone);
+        .to.be.equal(body.phone);
       expect(order.address, 'созданный заказ должен содержать переданный адресс')
-          .to.be.equal(body.address);
+        .to.be.equal(body.address);
     });
 
     it('отправить письмо пользователю об успешном создании заказа', async () => {
@@ -220,14 +220,14 @@ describe('8-module-2-task', () => {
       await request({
         method: 'post',
         url: serverURL,
-        body,
+        data: body,
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
 
       expect(get(envelope, 'to[0]'), 'письмо отправлено на почту пользователя').to
-          .equal(user.email);
+        .equal(user.email);
     });
 
     it('использовать id авторизованного пользователя', async () => {
@@ -278,13 +278,13 @@ describe('8-module-2-task', () => {
       const response = await request({
         method: 'post',
         url: serverURL,
-        body,
+        data: body,
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
 
-      const order = await Order.findById(response.body.order);
+      const order = await Order.findById(response.data.order);
 
       expect(order.user.toString(), 'id пользователя должен соответствовать авторизованому,' +
         'параметр в теле запроса должен быть проигнорирован').to.be.equal(user.id);
@@ -300,10 +300,10 @@ describe('8-module-2-task', () => {
       const token = 'token';
       await createUserAndSession(userData, token);
 
-      const {statusCode, body} = await request({
+      const {status, data} = await request({
         method: 'post',
         url: serverURL,
-        body: {
+        data: {
           products: 'foo-bar',
           phone: '12345',
         },
@@ -312,24 +312,24 @@ describe('8-module-2-task', () => {
         },
       });
 
-      expect(statusCode, 'статус код ответа должен быть 400').to.be.equal(400);
-      expect(body, 'тело ответа должно содержать объект с ошибками').to.have.property('errors');
-      expect(body.errors, 'products - ожидается получить ObjectId').to.have.property('product')
-          .that.include('required');
-      expect(body.errors, 'phone - свойство должно соответствовать шаблону')
-          .to.have.property('phone')
-          .that.equal('Неверный формат номера телефона.');
-      expect(body.errors, 'address - свойство обязательно').to.have.property('address')
-          .that.include('required');
+      expect(status, 'статус код ответа должен быть 400').to.be.equal(400);
+      expect(data, 'тело ответа должно содержать объект с ошибками').to.have.property('errors');
+      expect(data.errors, 'products - ожидается получить ObjectId').to.have.property('product')
+        .that.include('required');
+      expect(data.errors, 'phone - свойство должно соответствовать шаблону')
+        .to.have.property('phone')
+        .that.equal('Неверный формат номера телефона.');
+      expect(data.errors, 'address - свойство обязательно').to.have.property('address')
+        .that.include('required');
     });
 
     it('вернуть ошибку со статусом 401 если пользователь не авторизован', async () => {
-      const {statusCode} = await request({
+      const {status} = await request({
         method: 'post',
         url: serverURL,
       });
 
-      expect(statusCode, 'статус код ответа должен быть 401').to.be.equal(401);
+      expect(status, 'статус код ответа должен быть 401').to.be.equal(401);
     });
   });
 
@@ -433,7 +433,7 @@ describe('8-module-2-task', () => {
 
       await Order.insertMany(orders);
 
-      const {body} = await request({
+      const {data} = await request({
         method: 'get',
         url: serverURL,
         headers: {
@@ -441,19 +441,19 @@ describe('8-module-2-task', () => {
         },
       });
 
-      expect(body.orders, 'ключ orders в ответе должел быть массивом').to.be.an('array');
-      expect(body.orders, 'в ответе должно быть 2 заказа').to.have.lengthOf(2);
-      expect(body.orders, 'ответ должен содержать только заказы текущего пользователя')
-          .to.satisfy(() => body.orders.every((order) => order.user = user.id));
+      expect(data.orders, 'ключ orders в ответе должел быть массивом').to.be.an('array');
+      expect(data.orders, 'в ответе должно быть 2 заказа').to.have.lengthOf(2);
+      expect(data.orders, 'ответ должен содержать только заказы текущего пользователя')
+        .to.satisfy(() => data.orders.every((order) => order.user = user.id));
     });
 
     it('вернуть ошибку со статусом 401 если пользователь не авторизован', async () => {
-      const {statusCode} = await request({
+      const {status} = await request({
         method: 'post',
         url: serverURL,
       });
 
-      expect(statusCode, 'статус код ответа должен быть 401').to.be.equal(401);
+      expect(status, 'статус код ответа должен быть 401').to.be.equal(401);
     });
   });
 });
