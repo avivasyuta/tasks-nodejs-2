@@ -4,10 +4,10 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const Session = require('../models/Session');
 const Message = require('../models/Message');
-const request = require('request-promise').defaults({
-  resolveWithFullResponse: true,
-  simple: false,
-  json: true,
+const axios = require('axios');
+const request = axios.create({
+  responseType: 'json',
+  validateStatus: () => true,
 });
 const expect = require('chai').expect;
 const socket = require('../socket');
@@ -136,13 +136,13 @@ describe('9-module-1-task', () => {
 
       const response = await request({
         method: 'get',
-        uri: 'http://localhost:3001/api/messages',
+        url: 'http://localhost:3001/api/messages',
         headers: {
           'Authorization': 'Bearer token',
         },
       });
 
-      expect(response.body).to.eql({
+      expect(response.data).to.eql({
         messages: [{
           id: message.id,
           date: d.toISOString(),
@@ -155,11 +155,11 @@ describe('9-module-1-task', () => {
     it('незалогиненный пользователь не может сделать запрос на /messages', async () => {
       const response = await request({
         method: 'get',
-        uri: 'http://localhost:3001/api/messages',
+        url: 'http://localhost:3001/api/messages',
       });
 
-      expect(response.statusCode).to.equal(401);
-      expect(response.body.error).to.equal('Пользователь не залогинен');
+      expect(response.status).to.equal(401);
+      expect(response.data.error).to.equal('Пользователь не залогинен');
     });
   });
 });
