@@ -1,5 +1,6 @@
 const Koa = require('koa');
-const uuid = require('uuid/v4');
+const path = require('path');
+const { v4: uuid } = require('uuid');
 const Router = require('koa-router');
 const handleMongooseValidationError = require('./libs/validationErrors');
 const mustBeAuthenticated = require('./libs/mustBeAuthenticated');
@@ -13,6 +14,7 @@ const Session = require('./models/Session');
 
 const app = new Koa();
 
+app.use(require('koa-static')(path.join(__dirname, 'public')));
 app.use(require('koa-bodyparser')());
 
 app.use(async (ctx, next) => {
@@ -34,10 +36,10 @@ app.use((ctx, next) => {
   ctx.login = async function(user) {
     const token = uuid();
     await Session.create({token, user, lastVisit: new Date()});
-
+    
     return token;
   };
-
+  
   return next();
 });
 
@@ -46,17 +48,17 @@ const router = new Router({prefix: '/api'});
 router.use(async (ctx, next) => {
   const header = ctx.request.get('Authorization');
   if (!header) return next();
-
+  
   const token = header.split(' ')[1];
   if (!token) return next();
-
+  
   const session = await Session.findOne({token}).populate('user');
   if (!session) {
     ctx.throw(401, 'Неверный аутентификационный токен');
   }
   session.lastVisit = new Date();
   await session.save();
-
+  
   ctx.user = session.user;
   return next();
 });
@@ -76,5 +78,16 @@ router.post('/register', register);
 router.post('/confirm', confirm);
 
 app.use(router.routes());
+
+// this for HTML5 history in browser
+const fs = require('fs');
+
+const index = fs.readFileSync(path.join(__dirname, 'public/index.html'));
+app.use(async (ctx) => {
+  if (ctx.url.startsWith('/api') || ctx.method !== 'GET') return;
+  
+  ctx.set('content-type', 'text/html');
+  ctx.body = index;
+});
 
 module.exports = app;
