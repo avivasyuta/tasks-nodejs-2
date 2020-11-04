@@ -131,8 +131,8 @@ describe('4-module-2-task', () => {
               ).to.equal(201);
 
               expect(
-                  fse.existsSync(path.join(filesFolder, 'small.png')),
-                  'файл small.png должен быть на диске'
+                  fse.existsSync(path.join(filesFolder, 'example.txt')),
+                  'файл example.txt должен быть на диске'
               ).to.be.true;
 
               done();
